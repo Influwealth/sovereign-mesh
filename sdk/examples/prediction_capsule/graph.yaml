@@ -1,0 +1,25 @@
+version: 1
+capsule: capsule.prediction.v1
+nodes:
+  - id: capsule.prediction.v1
+    type: capsule
+    label: Prediction Capsule
+  - id: state.prediction.v1
+    type: state
+    label: Prediction State
+  - id: audit.prediction.v1
+    type: audit
+    label: Prediction Audit Stream
+edges:
+  - from: capsule.prediction.v1
+    to: state.prediction.v1
+    relation: mutates
+  - from: capsule.prediction.v1
+    to: audit.prediction.v1
+    relation: emits_audit
+events:
+  emits:
+    - prediction.requested
+    - prediction.completed
+  consumes: []
+dependencies: []
