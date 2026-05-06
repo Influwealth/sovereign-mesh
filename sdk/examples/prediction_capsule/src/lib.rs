@@ -33,12 +33,14 @@ pub mod prediction_capsule {
 
     #[update]
     pub async fn predict(context: CapsuleContext, payload: Vec<u8>) -> CapsuleResponse {
+        // TODO: let the runtime mount stable/ephemeral/sealed state before this update runs.
         let _requested = emit_event(
             "prediction.requested",
             &format!("trace_id={}", context.trace_id),
         );
 
         let signal_strength = if payload.is_empty() { "low" } else { "medium" };
+        // TODO: pass policy-approved, redacted parameters once the runtime owns quantum routing.
         let quantum_result = match quantum::run_job("capsule-execution-readiness").await {
             Ok(result) => result,
             Err(error) => format!("mock_quantum_error:{}", error.message),
@@ -58,6 +60,7 @@ pub mod prediction_capsule {
         context: CapsuleContext,
         payload: Vec<u8>,
     ) -> CapsuleResponse {
+        // TODO: replace this manual dispatcher with generated SDK/runtime entrypoint metadata.
         match method {
             "predict" => predict(context, payload).await,
             _ => CapsuleResponse::rejected("unsupported update method"),
@@ -65,6 +68,7 @@ pub mod prediction_capsule {
     }
 
     pub fn capsule_query_entry(method: &str, payload: Vec<u8>) -> CapsuleResponse {
+        // TODO: expose this query dispatcher through the runtime WASM ABI.
         let capsule = PredictionCapsule;
         capsule.handle(CapsuleRequest::new(method, payload))
     }

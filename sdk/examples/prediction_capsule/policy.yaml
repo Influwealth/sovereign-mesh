@@ -21,6 +21,14 @@ mutation:
   allowed_methods:
     - predict
   state_scope: prediction-state-v1
+queries:
+  allowed_methods:
+    - health
+quantum:
+  allowed_methods:
+    - predict
+  provider: mock
+  deterministic_required: true
 risk:
   max_payload_bytes: 65536
   require_audit: true

@@ -8,10 +8,19 @@ runtime = "sovereign-mesh-runtime"
 wasm_target = "wasm32-unknown-unknown"
 wasm_module = "prediction_capsule.wasm"
 
+[entrypoints]
+updates = ["predict"]
+queries = ["health"]
+update_dispatcher = "capsule_update_entry"
+query_dispatcher = "capsule_query_entry"
+
 [state]
 schema = "prediction-state-v1"
 mutable = true
 retention = "sovereign-local"
+stable = true
+ephemeral = true
+sealed = false
 
 [governance]
 capsule_class = "analytics"
@@ -24,3 +33,4 @@ enabled = true
 provider = "mock"
 model = "capsule-execution-readiness"
 deterministic_required = true
+params = "capsule-execution-readiness"

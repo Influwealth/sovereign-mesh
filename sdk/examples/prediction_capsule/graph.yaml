@@ -10,6 +10,9 @@ nodes:
   - id: audit.prediction.v1
     type: audit
     label: Prediction Audit Stream
+  - id: quantum.mock.capsule-execution-readiness
+    type: quantum-boundary
+    label: Mock Quantum Readiness Boundary
 edges:
   - from: capsule.prediction.v1
     to: state.prediction.v1
@@ -17,6 +20,9 @@ edges:
   - from: capsule.prediction.v1
     to: audit.prediction.v1
     relation: emits_audit
+  - from: capsule.prediction.v1
+    to: quantum.mock.capsule-execution-readiness
+    relation: invokes_mock_quantum
 events:
   emits:
     - prediction.requested

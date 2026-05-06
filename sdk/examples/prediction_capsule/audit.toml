@@ -18,3 +18,11 @@ include_caller = true
 include_policy_decision = true
 include_quantum_boundary = true
 include_execution_receipt = true
+
+[[audit.events]]
+name = "prediction.requested"
+redaction = "payload-hash-only"
+
+[[audit.events]]
+name = "prediction.completed"
+redaction = "summary-only"
