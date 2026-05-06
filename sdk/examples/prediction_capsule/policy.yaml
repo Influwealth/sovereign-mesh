@@ -1,0 +1,27 @@
+version: 1
+capsule: capsule.prediction.v1
+default_decision: deny
+callers:
+  sovereign-user:
+    methods:
+      - health
+      - predict
+  agent:
+    methods:
+      - health
+      - predict
+  partner:
+    methods:
+      - health
+escalation:
+  methods:
+    - govern_upgrade
+  reason: governance review required
+mutation:
+  allowed_methods:
+    - predict
+  state_scope: prediction-state-v1
+risk:
+  max_payload_bytes: 65536
+  require_audit: true
+  allow_probabilistic_quantum: false
