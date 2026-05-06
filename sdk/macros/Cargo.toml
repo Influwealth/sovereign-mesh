@@ -1,0 +1,11 @@
+[package]
+name = "sovereign-mesh-sdk-macros"
+version = "0.1.0"
+edition = "2021"
+description = "Attribute macros for Sovereign Mesh capsule authoring"
+license = "UNLICENSED"
+
+[lib]
+proc-macro = true
+
+[dependencies]

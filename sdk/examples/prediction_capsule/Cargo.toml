@@ -1,0 +1,13 @@
+[package]
+name = "prediction-capsule"
+version = "0.1.0"
+edition = "2021"
+description = "Example Sovereign Mesh prediction capsule"
+license = "UNLICENSED"
+
+[lib]
+name = "prediction_capsule"
+path = "src/lib.rs"
+
+[dependencies]
+sovereign-mesh-sdk = { path = "../.." }

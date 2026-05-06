@@ -10,3 +10,4 @@ name = "sovereign_mesh_sdk"
 path = "src/lib.rs"
 
 [dependencies]
+sovereign-mesh-sdk-macros = { path = "macros" }

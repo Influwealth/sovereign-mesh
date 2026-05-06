@@ -1,38 +1,71 @@
 use sovereign_mesh_sdk::{
-    encode_text, Capsule, CapsuleIdentity, CapsuleRequest, CapsuleResponse,
+    capsule, emit_event, encode_text, query, quantum, update, Capsule, CapsuleContext,
+    CapsuleIdentity, CapsuleRequest, CapsuleResponse,
 };
 
-pub struct PredictionCapsule;
+#[capsule]
+pub mod prediction_capsule {
+    use super::*;
 
-impl Capsule for PredictionCapsule {
-    fn identity(&self) -> CapsuleIdentity {
-        CapsuleIdentity::new(
-            "capsule.prediction.v1",
-            "Prediction Capsule",
-            "0.1.0",
-        )
-    }
+    pub struct PredictionCapsule;
 
-    fn handle(&self, request: CapsuleRequest) -> CapsuleResponse {
-        match request.method.as_str() {
-            "predict" => predict(request.payload),
-            "health" => CapsuleResponse::ok(encode_text("ok")),
-            _ => CapsuleResponse::rejected("unsupported method"),
+    impl Capsule for PredictionCapsule {
+        fn identity(&self) -> CapsuleIdentity {
+            CapsuleIdentity::new(
+                "capsule.prediction.v1",
+                "Prediction Capsule",
+                "0.1.0",
+            )
+        }
+
+        fn handle(&self, request: CapsuleRequest) -> CapsuleResponse {
+            match request.method.as_str() {
+                "health" => health(),
+                _ => CapsuleResponse::rejected("use async update entrypoints for mutating calls"),
+            }
         }
     }
-}
 
-fn predict(payload: Vec<u8>) -> CapsuleResponse {
-    let signal_strength = if payload.is_empty() { "low" } else { "medium" };
-    let response = format!(
-        "{{\"prediction\":\"hold\",\"confidence\":\"{}\",\"quantum_boundary\":\"mocked\"}}",
-        signal_strength
-    );
+    #[query]
+    pub fn health() -> CapsuleResponse {
+        CapsuleResponse::ok(encode_text("ok"))
+    }
 
-    CapsuleResponse::ok(response.into_bytes())
-}
+    #[update]
+    pub async fn predict(context: CapsuleContext, payload: Vec<u8>) -> CapsuleResponse {
+        let _requested = emit_event(
+            "prediction.requested",
+            &format!("trace_id={}", context.trace_id),
+        );
 
-pub fn capsule_entry(method: &str, payload: Vec<u8>) -> CapsuleResponse {
-    let capsule = PredictionCapsule;
-    capsule.handle(CapsuleRequest::new(method, payload))
+        let signal_strength = if payload.is_empty() { "low" } else { "medium" };
+        let quantum_result = match quantum::run_job("capsule-execution-readiness").await {
+            Ok(result) => result,
+            Err(error) => format!("mock_quantum_error:{}", error.message),
+        };
+
+        let response = format!(
+            "{{\"prediction\":\"hold\",\"confidence\":\"{}\",\"quantum_boundary\":\"{}\"}}",
+            signal_strength, quantum_result
+        );
+
+        let _completed = emit_event("prediction.completed", &response);
+        CapsuleResponse::ok(response.into_bytes())
+    }
+
+    pub async fn capsule_update_entry(
+        method: &str,
+        context: CapsuleContext,
+        payload: Vec<u8>,
+    ) -> CapsuleResponse {
+        match method {
+            "predict" => predict(context, payload).await,
+            _ => CapsuleResponse::rejected("unsupported update method"),
+        }
+    }
+
+    pub fn capsule_query_entry(method: &str, payload: Vec<u8>) -> CapsuleResponse {
+        let capsule = PredictionCapsule;
+        capsule.handle(CapsuleRequest::new(method, payload))
+    }
 }
