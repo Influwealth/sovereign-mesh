@@ -1,0 +1,12 @@
+[package]
+name = "sovereign-mesh-sdk"
+version = "0.1.0"
+edition = "2021"
+description = "Rust SDK helpers for Sovereign Mesh capsules"
+license = "UNLICENSED"
+
+[lib]
+name = "sovereign_mesh_sdk"
+path = "src/lib.rs"
+
+[dependencies]
