@@ -1,4 +1,5 @@
 use crate::ingress::IngressMessage;
+use crate::{ExecutionError, Request};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum ExecutionPriority {
@@ -35,4 +36,11 @@ impl Scheduler for DeterministicScheduler {
             lane: "default-sovereign-lane".to_string(),
         }
     }
+}
+
+pub fn schedule(_req: &Request) -> Result<(), ExecutionError> {
+    // TODO: route by subsidy_class once capsule metadata is loaded.
+    // TODO: honor edge_compatible placement for low-latency sovereign nodes.
+    // TODO: add mesh-aware placement across trusted runtime lanes.
+    Ok(())
 }

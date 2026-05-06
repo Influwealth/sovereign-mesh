@@ -1,4 +1,10 @@
-#[derive(Clone, Debug, PartialEq, Eq)]
+use crate::audit::record_audit_event;
+use crate::execution::execute_capsule;
+use crate::policy::check_policy;
+use crate::scheduler::schedule;
+use crate::{ExecutionError, Request, Response};
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CallerClass {
     Agent,
     Partner,
@@ -31,4 +37,25 @@ impl IngressMessage {
         }
         Ok(())
     }
+}
+
+pub fn handle_ingress(req: Request) -> Result<Response, ExecutionError> {
+    record_audit_event(
+        "ingress.received",
+        &format!("trace_id={} capsule={}", req.trace_id, req.capsule_id),
+    );
+
+    check_policy(&req)?;
+    schedule(&req)?;
+    let response = execute_capsule(req)?;
+
+    record_audit_event(
+        "ingress.completed",
+        &format!(
+            "trace_id={} capsule={} method={}",
+            response.trace_id, response.capsule_id, response.method
+        ),
+    );
+
+    Ok(response)
 }

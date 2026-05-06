@@ -5,6 +5,13 @@ pub mod policy;
 pub mod quantum;
 pub mod scheduler;
 
+pub use audit::record_audit_event;
+pub use execution::execute_capsule;
+pub use ingress::handle_ingress;
+pub use policy::check_policy;
+pub use quantum::run_quantum_job;
+pub use scheduler::schedule;
+
 use audit::{AuditEvent, AuditSink};
 use execution::{ExecutionContext, ExecutionReceipt, WasmExecutor};
 use ingress::IngressMessage;
@@ -12,13 +19,72 @@ use policy::{PolicyDecision, PolicyEngine};
 use quantum::QuantumBoundary;
 use scheduler::Scheduler;
 
-#[derive(Debug)]
-pub enum RuntimeError {
-    InvalidIngress(String),
+pub type CapsuleId = String;
+pub type MethodName = String;
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Request {
+    pub trace_id: String,
+    pub caller: String,
+    pub capsule_id: CapsuleId,
+    pub method: MethodName,
+    pub payload: Vec<u8>,
+}
+
+impl Request {
+    pub fn new(
+        trace_id: impl Into<String>,
+        caller: impl Into<String>,
+        capsule_id: impl Into<CapsuleId>,
+        method: impl Into<MethodName>,
+        payload: impl Into<Vec<u8>>,
+    ) -> Self {
+        Self {
+            trace_id: trace_id.into(),
+            caller: caller.into(),
+            capsule_id: capsule_id.into(),
+            method: method.into(),
+            payload: payload.into(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct Response {
+    pub trace_id: String,
+    pub capsule_id: CapsuleId,
+    pub method: MethodName,
+    pub message: String,
+    pub payload: Vec<u8>,
+}
+
+impl Response {
+    pub fn new(
+        trace_id: impl Into<String>,
+        capsule_id: impl Into<CapsuleId>,
+        method: impl Into<MethodName>,
+        message: impl Into<String>,
+        payload: impl Into<Vec<u8>>,
+    ) -> Self {
+        Self {
+            trace_id: trace_id.into(),
+            capsule_id: capsule_id.into(),
+            method: method.into(),
+            message: message.into(),
+            payload: payload.into(),
+        }
+    }
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum ExecutionError {
+    InvalidRequest(String),
     PolicyDenied(String),
     GovernanceEscalation(String),
+    SchedulingFailed(String),
     ExecutionFailed(String),
     AuditFailed(String),
+    QuantumFailed(String),
 }
 
 pub struct CapsuleRuntime<P, S, E, Q, A>
@@ -54,21 +120,24 @@ where
         }
     }
 
-    pub fn handle_ingress(&mut self, ingress: IngressMessage) -> Result<ExecutionReceipt, RuntimeError> {
+    pub fn handle_ingress(
+        &mut self,
+        ingress: IngressMessage,
+    ) -> Result<ExecutionReceipt, ExecutionError> {
         ingress
             .validate()
-            .map_err(RuntimeError::InvalidIngress)?;
+            .map_err(ExecutionError::InvalidRequest)?;
 
         let policy_decision = self.policy.evaluate(&ingress);
         match &policy_decision {
             PolicyDecision::Allow => {}
             PolicyDecision::Deny(reason) => {
                 self.audit_policy_stop(&ingress, &policy_decision)?;
-                return Err(RuntimeError::PolicyDenied(reason.clone()));
+                return Err(ExecutionError::PolicyDenied(reason.clone()));
             }
             PolicyDecision::Escalate(reason) => {
                 self.audit_policy_stop(&ingress, &policy_decision)?;
-                return Err(RuntimeError::GovernanceEscalation(reason.clone()));
+                return Err(ExecutionError::GovernanceEscalation(reason.clone()));
             }
         }
 
@@ -82,11 +151,11 @@ where
         let receipt = self
             .executor
             .execute(&ingress, &context)
-            .map_err(RuntimeError::ExecutionFailed)?;
+            .map_err(ExecutionError::ExecutionFailed)?;
 
         self.audit
             .record(AuditEvent::execution_completed(&ingress, &receipt))
-            .map_err(RuntimeError::AuditFailed)?;
+            .map_err(ExecutionError::AuditFailed)?;
 
         Ok(receipt)
     }
@@ -95,9 +164,9 @@ where
         &mut self,
         ingress: &IngressMessage,
         decision: &PolicyDecision,
-    ) -> Result<(), RuntimeError> {
+    ) -> Result<(), ExecutionError> {
         self.audit
             .record(AuditEvent::policy_stopped(ingress, decision))
-            .map_err(RuntimeError::AuditFailed)
+            .map_err(ExecutionError::AuditFailed)
     }
 }

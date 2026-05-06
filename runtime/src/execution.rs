@@ -1,6 +1,7 @@
 use crate::ingress::IngressMessage;
 use crate::quantum::QuantumInference;
 use crate::scheduler::ScheduleDecision;
+use crate::{ExecutionError, Request, Response};
 
 #[derive(Clone, Debug)]
 pub struct ExecutionContext {
@@ -53,4 +54,22 @@ impl WasmExecutor for MockWasmExecutor {
             output,
         })
     }
+}
+
+pub fn execute_capsule(req: Request) -> Result<Response, ExecutionError> {
+    // TODO: load the capsule WASM module declared by capsule.toml.
+    // TODO: mount stable, ephemeral, and sealed state before invocation.
+    // TODO: dispatch to registered update/query methods through the SDK ABI.
+    let message = format!(
+        "executed placeholder capsule method {} on {}",
+        req.method, req.capsule_id
+    );
+
+    Ok(Response::new(
+        req.trace_id,
+        req.capsule_id,
+        req.method,
+        message.clone(),
+        message.into_bytes(),
+    ))
 }

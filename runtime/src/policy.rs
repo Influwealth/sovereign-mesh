@@ -1,4 +1,5 @@
 use crate::ingress::{CallerClass, IngressMessage};
+use crate::{ExecutionError, Request};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PolicyDecision {
@@ -51,4 +52,20 @@ impl PolicyEngine for StaticPolicyEngine {
             PolicyDecision::Deny(format!("caller class denied for method {}", ingress.method))
         }
     }
+}
+
+pub fn check_policy(req: &Request) -> Result<(), ExecutionError> {
+    if req.capsule_id.trim().is_empty() {
+        return Err(ExecutionError::InvalidRequest(
+            "capsule_id is required before policy evaluation".to_string(),
+        ));
+    }
+
+    if req.method.trim().is_empty() {
+        return Err(ExecutionError::InvalidRequest(
+            "method is required before policy evaluation".to_string(),
+        ));
+    }
+
+    Ok(())
 }

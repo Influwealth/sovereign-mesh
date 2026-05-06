@@ -24,7 +24,7 @@ The execution layer is represented by a trait. It will later host a WASM engine 
 
 ### Quantum
 
-The quantum layer is a mocked inference boundary. It is called only when requested by capsule execution context or policy. It returns deterministic placeholder scores.
+The quantum layer is a mocked inference boundary. It is called only when requested by capsule execution context or policy. It returns deterministic placeholder scores through `MockQuantumBoundary` and placeholder async job output through `run_quantum_job`.
 
 ### Audit
 
@@ -35,6 +35,15 @@ The audit layer records runtime decisions. Production implementations should use
 ```text
 Ingress -> Policy -> Scheduler -> Execution -> Quantum Boundary -> Audit -> Receipt
 ```
+
+The minimal `handle_ingress(req)` path currently performs:
+
+1. `policy::check_policy(req)`
+2. `scheduler::schedule(req)`
+3. `execution::execute_capsule(req)`
+4. `audit::record_audit_event(...)`
+
+Quantum execution is optional today. Runtime and capsule code can call `quantum::run_quantum_job(params)` until the real adapter registry exists.
 
 ## Failure Behavior
 

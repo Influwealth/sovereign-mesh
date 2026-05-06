@@ -57,3 +57,10 @@ impl AuditSink for MemoryAuditSink {
         Ok(())
     }
 }
+
+pub fn record_audit_event(event: &str, details: &str) {
+    // TODO: route audit records to on-chain and off-chain sovereign targets.
+    // TODO: apply capsule-specific redaction rules before durable writes.
+    // TODO: support zk-compressed logs for high-volume audit streams.
+    println!("sovereign-mesh.audit event={} details={}", event, details);
+}

@@ -1,3 +1,5 @@
+use crate::ExecutionError;
+
 #[derive(Clone, Debug, PartialEq)]
 pub struct QuantumInference {
     pub model: String,
@@ -20,6 +22,19 @@ impl Default for MockQuantumBoundary {
             deterministic_score: 0.5,
         }
     }
+}
+
+pub async fn run_quantum_job(params: &str) -> Result<String, ExecutionError> {
+    // TODO: integrate real backend adapters without binding the runtime to one vendor.
+    // TODO: account for latency budgets and deterministic replay requirements.
+    // TODO: anonymize capsule payloads before remote quantum or hybrid inference.
+    if params.trim().is_empty() {
+        return Err(ExecutionError::QuantumFailed(
+            "quantum job params cannot be empty".to_string(),
+        ));
+    }
+
+    Ok("quantum_result".to_string())
 }
 
 impl QuantumBoundary for MockQuantumBoundary {
