@@ -1,0 +1,20 @@
+[audit]
+enabled = true
+stream = "audit.prediction.v1"
+retention = "sovereign-retain"
+redaction = "payload-hash-only"
+
+[audit.sinks.local]
+enabled = true
+path = "logs/prediction-capsule.audit.log"
+
+[audit.proofs]
+enabled = false
+strategy = "pending"
+
+[audit.fields]
+include_trace_id = true
+include_caller = true
+include_policy_decision = true
+include_quantum_boundary = true
+include_execution_receipt = true
