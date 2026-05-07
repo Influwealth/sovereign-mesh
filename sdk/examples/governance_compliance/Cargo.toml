@@ -1,0 +1,13 @@
+[package]
+name = "governance-compliance"
+version = "0.1.0"
+edition = "2021"
+description = "Governance and compliance capsule for Sovereign Mesh"
+license = "UNLICENSED"
+
+[lib]
+name = "governance_compliance"
+path = "src/lib.rs"
+
+[dependencies]
+sovereign-mesh-sdk = { path = "../.." }

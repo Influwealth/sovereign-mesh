@@ -1,0 +1,33 @@
+[audit]
+enabled = true
+stream = "audit.governance_compliance.v1"
+retention = "sovereign-governance-retain"
+redaction = "sensitive-governance-fields"
+
+[audit.sinks.local]
+enabled = true
+path = "logs/governance-compliance.audit.log"
+
+[audit.proofs]
+enabled = false
+strategy = "pending-governance-proof-log"
+
+[audit.fields]
+include_trace_id = true
+include_caller = true
+include_policy_decision = true
+include_execution_receipt = true
+include_quantum_boundary = false
+
+[[audit.events]]
+name = "governance.subsidy_class_updated"
+redaction = "capsule-id-hash-only"
+
+[[audit.events]]
+name = "governance.compliance_flag_updated"
+redaction = "flag-summary-only"
+
+[audit.sensitive_fields]
+principal = "redact"
+capsule_id = "hash"
+compliance_flags = "summary"

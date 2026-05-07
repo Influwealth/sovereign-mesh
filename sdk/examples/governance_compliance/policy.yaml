@@ -1,0 +1,44 @@
+version: 1
+capsule: capsule.governance_compliance.v1
+default_decision: deny
+roles:
+  governance-admin:
+    principal: "placeholder-governance-principal"
+    methods:
+      - set_subsidy_class_for_capsule
+      - set_compliance_flag_for_capsule
+      - get_capsule_governance_state
+callers:
+  agent:
+    methods:
+      - get_capsule_governance_state
+  sovereign-user:
+    methods:
+      - get_capsule_governance_state
+  partner:
+    methods: []
+escalation:
+  methods:
+    - set_subsidy_class_for_capsule
+    - set_compliance_flag_for_capsule
+  reason: governance updates require governance-admin role and audit review
+mutation:
+  allowed_methods:
+    - set_subsidy_class_for_capsule
+    - set_compliance_flag_for_capsule
+  required_role: governance-admin
+  state_scope: governance-compliance-state-v1
+queries:
+  allowed_methods:
+    - get_capsule_governance_state
+compliance:
+  placeholder: "governance-role-check-required"
+  requires_manual_review: true
+  sensitive_fields:
+    - principal
+    - capsule_id
+    - compliance_flags
+risk:
+  max_payload_bytes: 16384
+  require_audit: true
+  allow_probabilistic_quantum: false

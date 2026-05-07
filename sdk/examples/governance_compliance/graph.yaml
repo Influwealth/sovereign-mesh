@@ -1,0 +1,51 @@
+version: 1
+capsule: capsule.governance_compliance.v1
+nodes:
+  - id: capsule.governance_compliance.v1
+    type: capsule
+    label: Governance Compliance Capsule
+  - id: runtime.sovereign_mesh.v1
+    type: runtime
+    label: Sovereign Mesh Runtime
+  - id: admin_tools.sovereign_mesh.v1
+    type: admin-tools
+    label: Sovereign Mesh Admin Tools
+  - id: capsule.prediction.v1
+    type: capsule
+    label: Prediction Capsule
+  - id: capsule.dames_legacy_account.v1
+    type: capsule
+    label: Dames Legacy Account Capsule
+  - id: state.governance_compliance.v1
+    type: stable-state
+    label: Governance Compliance Stable State
+  - id: audit.governance_compliance.v1
+    type: audit
+    label: Governance Compliance Audit Stream
+edges:
+  - from: runtime.sovereign_mesh.v1
+    to: capsule.governance_compliance.v1
+    relation: may_call
+  - from: admin_tools.sovereign_mesh.v1
+    to: capsule.governance_compliance.v1
+    relation: may_call
+  - from: capsule.prediction.v1
+    to: capsule.governance_compliance.v1
+    relation: may_depend_on_governance_state
+  - from: capsule.dames_legacy_account.v1
+    to: capsule.governance_compliance.v1
+    relation: may_depend_on_governance_state
+  - from: capsule.governance_compliance.v1
+    to: state.governance_compliance.v1
+    relation: stores_governance_state
+  - from: capsule.governance_compliance.v1
+    to: audit.governance_compliance.v1
+    relation: emits_audit
+events:
+  emits:
+    - governance.subsidy_class_updated
+    - governance.compliance_flag_updated
+  consumes: []
+dependencies:
+  - capsule.prediction.v1
+  - capsule.dames_legacy_account.v1

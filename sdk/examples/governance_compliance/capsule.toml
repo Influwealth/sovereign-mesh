@@ -1,0 +1,36 @@
+[capsule]
+id = "capsule.governance_compliance.v1"
+name = "Governance Compliance Capsule"
+version = "0.1.0"
+description = "Governance capsule for subsidy class overrides and compliance flags."
+authors = ["Influwealth Quantum Labs"]
+runtime = "sovereign-mesh-runtime"
+wasm_target = "wasm32-unknown-unknown"
+wasm_module = "governance_compliance.wasm"
+
+[entrypoints]
+updates = ["set_subsidy_class_for_capsule", "set_compliance_flag_for_capsule"]
+queries = ["get_capsule_governance_state"]
+update_dispatcher = "capsule_update_entry"
+query_dispatcher = "capsule_query_entry"
+
+[state]
+schema = "governance-compliance-state-v1"
+mutable = true
+retention = "sovereign-governance-retain"
+stable = true
+ephemeral = false
+sealed = true
+
+[governance]
+capsule_class = "governance-compliance"
+subsidy_class = "enterprise"
+review_required = true
+jurisdiction = "sovereign"
+upgrade_policy = "governance-admin-approved"
+
+[quantum]
+enabled = false
+provider = "none"
+model = ""
+deterministic_required = true
