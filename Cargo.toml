@@ -3,6 +3,7 @@ members = [
     "runtime",
     "sdk",
     "sdk/macros",
+    "sdk/examples/dames_legacy_account",
     "sdk/examples/prediction_capsule",
 ]
 resolver = "2"

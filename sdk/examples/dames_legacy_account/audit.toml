@@ -1,0 +1,28 @@
+[audit]
+enabled = true
+stream = "audit.dames_legacy_account.v1"
+retention = "sovereign-youth-retain"
+redaction = "pii-minimized"
+
+[audit.sinks.local]
+enabled = true
+path = "logs/dames-legacy-account.audit.log"
+
+[audit.proofs]
+enabled = false
+strategy = "pending-zk-compressed-youth-log"
+
+[audit.fields]
+include_trace_id = true
+include_caller = true
+include_policy_decision = true
+include_execution_receipt = true
+include_quantum_boundary = false
+
+[[audit.events]]
+name = "youth.registered"
+redaction = "guardian-contact-hash-only"
+
+[[audit.events]]
+name = "youth.updated"
+redaction = "changed-fields-summary-only"

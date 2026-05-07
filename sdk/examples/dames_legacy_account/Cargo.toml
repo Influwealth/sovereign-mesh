@@ -1,0 +1,13 @@
+[package]
+name = "dames-legacy-account"
+version = "0.1.0"
+edition = "2021"
+description = "Dames Legacy Account capsule for youth profile registration"
+license = "UNLICENSED"
+
+[lib]
+name = "dames_legacy_account"
+path = "src/lib.rs"
+
+[dependencies]
+sovereign-mesh-sdk = { path = "../.." }

@@ -1,0 +1,38 @@
+version: 1
+capsule: capsule.dames_legacy_account.v1
+default_decision: deny
+callers:
+  sovereign-user:
+    methods:
+      - register_youth
+      - update_profile
+      - get_profile
+  agent:
+    methods:
+      - register_youth
+      - update_profile
+      - get_profile
+  partner:
+    methods: []
+escalation:
+  methods:
+    - govern_upgrade
+    - export_profiles
+  reason: youth data requires governance and guardian review
+mutation:
+  allowed_methods:
+    - register_youth
+    - update_profile
+  state_scope: dames-legacy-account-state-v1
+queries:
+  allowed_methods:
+    - get_profile
+compliance:
+  placeholder: "youth-data-review-required"
+  guardian_consent_required: true
+  pii_redaction_required: true
+  jurisdiction_review: "pending"
+risk:
+  max_payload_bytes: 32768
+  require_audit: true
+  allow_probabilistic_quantum: false

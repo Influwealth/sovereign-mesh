@@ -1,0 +1,36 @@
+[capsule]
+id = "capsule.dames_legacy_account.v1"
+name = "Dames Legacy Account Capsule"
+version = "0.1.0"
+description = "Youth legacy account capsule for registration, profile updates, and governed profile lookup."
+authors = ["Influwealth Quantum Labs"]
+runtime = "sovereign-mesh-runtime"
+wasm_target = "wasm32-unknown-unknown"
+wasm_module = "dames_legacy_account.wasm"
+
+[entrypoints]
+updates = ["register_youth", "update_profile"]
+queries = ["get_profile"]
+update_dispatcher = "capsule_update_entry"
+query_dispatcher = "capsule_query_entry"
+
+[state]
+schema = "dames-legacy-account-state-v1"
+mutable = true
+retention = "sovereign-youth-retain"
+stable = true
+ephemeral = false
+sealed = true
+
+[governance]
+capsule_class = "youth-legacy-account"
+subsidy_class = "youth"
+review_required = true
+jurisdiction = "sovereign"
+upgrade_policy = "guardian-and-governance-approved"
+
+[quantum]
+enabled = false
+provider = "none"
+model = ""
+deterministic_required = true

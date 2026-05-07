@@ -1,0 +1,31 @@
+version: 1
+capsule: capsule.dames_legacy_account.v1
+nodes:
+  - id: capsule.dames_legacy_account.v1
+    type: capsule
+    label: Dames Legacy Account Capsule
+  - id: state.dames_legacy_account.v1
+    type: stable-state
+    label: Youth Profile Stable State
+  - id: audit.dames_legacy_account.v1
+    type: audit
+    label: Dames Legacy Account Audit Stream
+  - id: compliance.youth_data.v1
+    type: compliance
+    label: Youth Data Compliance Placeholder
+edges:
+  - from: capsule.dames_legacy_account.v1
+    to: state.dames_legacy_account.v1
+    relation: stores_youth_profiles
+  - from: capsule.dames_legacy_account.v1
+    to: audit.dames_legacy_account.v1
+    relation: emits_audit
+  - from: capsule.dames_legacy_account.v1
+    to: compliance.youth_data.v1
+    relation: requires_review
+events:
+  emits:
+    - youth.registered
+    - youth.updated
+  consumes: []
+dependencies: []
