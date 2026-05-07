@@ -1,5 +1,8 @@
 use std::collections::BTreeMap;
 
+pub mod metadata;
+
+pub use metadata::{parse_capsule_metadata, CapsuleMetadata, MetadataError};
 pub use sovereign_mesh_sdk_macros::{capsule, query, update};
 
 #[derive(Clone, Debug, PartialEq, Eq)]

@@ -49,3 +49,21 @@ impl QuantumBoundary for MockQuantumBoundary {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{MockQuantumBoundary, QuantumBoundary};
+
+    #[test]
+    fn mock_quantum_boundary_returns_deterministic_score() {
+        let boundary = MockQuantumBoundary {
+            deterministic_score: 0.7,
+        };
+
+        let inference = boundary.infer("capsule-execution-readiness", b"payload");
+
+        assert_eq!(inference.model, "capsule-execution-readiness");
+        assert!((inference.score - 0.71).abs() < f64::EPSILON);
+        assert_eq!(inference.explanation, "mocked deterministic quantum boundary");
+    }
+}

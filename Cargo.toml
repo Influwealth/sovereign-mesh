@@ -1,0 +1,8 @@
+[workspace]
+members = [
+    "runtime",
+    "sdk",
+    "sdk/macros",
+    "sdk/examples/prediction_capsule",
+]
+resolver = "2"
