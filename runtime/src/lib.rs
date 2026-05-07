@@ -1,5 +1,6 @@
 pub mod audit;
 pub mod execution;
+pub mod graph;
 pub mod ingress;
 pub mod policy;
 pub mod policy_loader;
@@ -8,10 +9,11 @@ pub mod scheduler;
 
 pub use audit::record_audit_event;
 pub use execution::execute_capsule;
+pub use graph::{load_graph_for_capsule, CapsuleEdge, CapsuleGraph, CapsuleNode};
 pub use ingress::handle_ingress;
 pub use policy::check_policy;
 pub use quantum::run_quantum_job;
-pub use scheduler::schedule;
+pub use scheduler::{schedule, ScheduleDecision};
 
 use audit::{AuditEvent, AuditSink};
 use execution::{ExecutionContext, ExecutionReceipt, WasmExecutor};
@@ -22,6 +24,21 @@ use scheduler::Scheduler;
 
 pub type CapsuleId = String;
 pub type MethodName = String;
+pub type NodeId = String;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum SubsidyClass {
+    Youth,
+    Underserved,
+    Standard,
+    Enterprise,
+}
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum EdgeCompatibility {
+    Eligible,
+    NotEligible,
+}
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Request {
@@ -30,6 +47,9 @@ pub struct Request {
     pub capsule_id: CapsuleId,
     pub method: MethodName,
     pub payload: Vec<u8>,
+    pub subsidy_class: SubsidyClass,
+    pub edge_compatibility: EdgeCompatibility,
+    pub preferred_node: Option<NodeId>,
 }
 
 impl Request {
@@ -46,7 +66,22 @@ impl Request {
             capsule_id: capsule_id.into(),
             method: method.into(),
             payload: payload.into(),
+            subsidy_class: SubsidyClass::Standard,
+            edge_compatibility: EdgeCompatibility::NotEligible,
+            preferred_node: None,
         }
+    }
+
+    pub fn with_scheduling(
+        mut self,
+        subsidy_class: SubsidyClass,
+        edge_compatibility: EdgeCompatibility,
+        preferred_node: Option<NodeId>,
+    ) -> Self {
+        self.subsidy_class = subsidy_class;
+        self.edge_compatibility = edge_compatibility;
+        self.preferred_node = preferred_node;
+        self
     }
 }
 

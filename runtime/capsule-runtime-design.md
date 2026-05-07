@@ -16,7 +16,13 @@ The policy layer determines whether a caller may execute a capsule method. Decis
 
 ### Scheduler
 
-The scheduler chooses execution priority. The initial scheduler is deterministic and simple. Future schedulers may consider graph dependencies, governance requirements, and resource budgets.
+The scheduler chooses execution priority and an execution lane. The initial scheduler is deterministic and simple: youth capsules prefer a `youth-priority` lane, underserved capsules prefer an `underserved-priority` lane, enterprise capsules use an `enterprise` lane, and standard capsules use the standard lane. Edge-compatible requests are marked as eligible for future edge placement.
+
+Future schedulers may consider graph dependencies, governance requirements, resource budgets, locality-aware placement, smart-city data proximity, and multi-node load balancing.
+
+### Graph
+
+The graph layer describes capsule nodes, dependencies, audit streams, compliance relationships, and future placement hints. `graph::load_graph_for_capsule` is currently a placeholder hook. Later runtime versions should load `graph.yaml`, validate graph signatures, and pass graph constraints into scheduling and policy checks.
 
 ### Execution
 
@@ -39,7 +45,7 @@ Ingress -> Policy -> Scheduler -> Execution -> Quantum Boundary -> Audit -> Rece
 The minimal `handle_ingress(req)` path currently performs:
 
 1. `policy::check_policy(req)`
-2. `scheduler::schedule(req)`
+2. `scheduler::schedule(req)` for mesh-aware lane selection
 3. `execution::execute_capsule(req)`
 4. `audit::record_audit_event(...)`
 

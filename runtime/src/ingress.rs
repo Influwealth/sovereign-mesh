@@ -46,7 +46,14 @@ pub fn handle_ingress(req: Request) -> Result<Response, ExecutionError> {
     );
 
     check_policy(&req)?;
-    schedule(&req)?;
+    let schedule_decision = schedule(&req)?;
+    record_audit_event(
+        "scheduler.selected",
+        &format!(
+            "trace_id={} lane={} edge_eligible={}",
+            req.trace_id, schedule_decision.lane, schedule_decision.edge_eligible
+        ),
+    );
     let response = execute_capsule(req)?;
 
     record_audit_event(
