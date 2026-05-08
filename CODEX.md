@@ -246,6 +246,22 @@ Codex must not:
 - Modify governance capsule without explicit instruction
 - Modify observability capsule without explicit instruction
 
+## 13. MCP Integration Rules
+
+Codex must use the following MCP servers when interacting with the Sovereign Mesh:
+
+- `sovereign_mesh` → meshctl commands
+- `sovereign_runtime` → SAP message execution
+- `mesh_observability` → metrics and observability capsule
+- `mesh_governance` → governance capsule
+
+Codex must route:
+
+- operational queries → `sovereign_mesh`
+- capsule execution → `sovereign_runtime`
+- metrics → `mesh_observability`
+- governance → `mesh_governance`
+
 ## CODEX.md Complete
 
 This is the canonical brain file for Codex inside your sovereign workspace.

@@ -2,6 +2,11 @@ use sovereign_mesh_runtime::{EdgeCompatibility, Request, SubsidyClass};
 
 fn main() {
     let args: Vec<String> = std::env::args().skip(1).collect();
+    if args.first().map(String::as_str) == Some("mcp") {
+        run_mcp_server();
+        return;
+    }
+
     let output = render_cli(&args);
     println!("{}", output);
 }
@@ -28,6 +33,7 @@ pub fn render_cli(args: &[String]) -> String {
             render_capsule(id, json)
         }
         "governance" => render_governance(json),
+        "metrics" => render_metrics(json),
         _ => render_help(json),
     }
 }
@@ -102,13 +108,25 @@ fn render_governance(json: bool) -> String {
     ])
 }
 
+fn render_metrics(json: bool) -> String {
+    if json {
+        return "{\"scheduler_decisions_total\":0,\"capsule_executions_total\":0,\"pending_requests\":0}".to_string();
+    }
+
+    table(&[
+        ("Scheduler Decisions", "0"),
+        ("Capsule Executions", "0"),
+        ("Pending Requests", "0"),
+    ])
+}
+
 fn render_help(json: bool) -> String {
     if json {
-        return "{\"commands\":[\"status\",\"graph\",\"schedule\",\"capsule <id>\",\"governance\"]}"
+        return "{\"commands\":[\"status\",\"graph\",\"schedule\",\"capsule <id>\",\"governance\",\"metrics\"]}"
             .to_string();
     }
 
-    "Commands: status | graph | schedule | capsule <id> | governance".to_string()
+    "Commands: status | graph | schedule | capsule <id> | governance | metrics".to_string()
 }
 
 fn table(rows: &[(&str, &str)]) -> String {
@@ -126,6 +144,103 @@ fn bool_text(value: bool) -> &'static str {
     } else {
         "false"
     }
+}
+
+fn run_mcp_server() {
+    use std::io::{self, BufRead, Write};
+
+    let stdin = io::stdin();
+    let mut stdout = io::stdout();
+    for line in stdin.lock().lines() {
+        let Ok(line) = line else {
+            break;
+        };
+        if line.trim().is_empty() {
+            continue;
+        }
+
+        let response = handle_mcp_request(&line);
+        let _ = writeln!(stdout, "{}", response);
+        let _ = stdout.flush();
+    }
+}
+
+fn handle_mcp_request(input: &str) -> String {
+    let id = json_field(input, "id").unwrap_or_else(|| "null".to_string());
+    if input.contains("\"method\":\"initialize\"") {
+        return format!(
+            "{{\"jsonrpc\":\"2.0\",\"id\":{},\"result\":{{\"protocolVersion\":\"2024-11-05\",\"serverInfo\":{{\"name\":\"sovereign_mesh\",\"version\":\"0.1.0\"}},\"capabilities\":{{\"tools\":{{}}}}}}}}",
+            id
+        );
+    }
+    if input.contains("\"method\":\"tools/list\"") {
+        return format!(
+            "{{\"jsonrpc\":\"2.0\",\"id\":{},\"result\":{{\"tools\":[{}]}}}}",
+            id,
+            [
+                tool_json("meshctl_status", "Return Sovereign Mesh operator status."),
+                tool_json("meshctl_graph", "Return capsule graph overview."),
+                tool_json("meshctl_schedule", "Return deterministic scheduler lane decision."),
+                tool_json("meshctl_capsule", "Inspect one capsule by id."),
+                tool_json("meshctl_governance", "Return governance operator status."),
+                tool_json("meshctl_metrics", "Return runtime metric summary.")
+            ]
+            .join(",")
+        );
+    }
+    if input.contains("\"method\":\"tools/call\"") {
+        let name = json_string_field(input, "name").unwrap_or_default();
+        let text = match name.as_str() {
+            "meshctl_status" => render_status(false),
+            "meshctl_graph" => render_graph(false),
+            "meshctl_schedule" => render_schedule(false),
+            "meshctl_capsule" => render_capsule("capsule.unknown", false),
+            "meshctl_governance" => render_governance(false),
+            "meshctl_metrics" => render_metrics(false),
+            _ => "unknown meshctl MCP tool".to_string(),
+        };
+        return format!(
+            "{{\"jsonrpc\":\"2.0\",\"id\":{},\"result\":{{\"content\":[{{\"type\":\"text\",\"text\":\"{}\"}}]}}}}",
+            id,
+            json_escape(&text)
+        );
+    }
+
+    format!(
+        "{{\"jsonrpc\":\"2.0\",\"id\":{},\"result\":{{\"content\":[{{\"type\":\"text\",\"text\":\"unsupported MCP request\"}}]}}}}",
+        id
+    )
+}
+
+fn tool_json(name: &str, description: &str) -> String {
+    format!(
+        "{{\"name\":\"{}\",\"description\":\"{}\",\"inputSchema\":{{\"type\":\"object\",\"properties\":{{}}}}}}",
+        name, description
+    )
+}
+
+fn json_field(input: &str, field: &str) -> Option<String> {
+    let needle = format!("\"{}\":", field);
+    let start = input.find(&needle)? + needle.len();
+    let rest = &input[start..];
+    let end = rest.find([',', '}']).unwrap_or(rest.len());
+    Some(rest[..end].trim().to_string())
+}
+
+fn json_string_field(input: &str, field: &str) -> Option<String> {
+    let needle = format!("\"{}\":\"", field);
+    let start = input.find(&needle)? + needle.len();
+    let rest = &input[start..];
+    let end = rest.find('"')?;
+    Some(rest[..end].to_string())
+}
+
+fn json_escape(value: &str) -> String {
+    value
+        .replace('\\', "\\\\")
+        .replace('"', "\\\"")
+        .replace('\n', "\\n")
+        .replace('\r', "\\r")
 }
 
 #[cfg(test)]
@@ -152,5 +267,11 @@ mod tests {
             "capsule.prediction.v1".to_string(),
         ]);
         assert!(output.contains("capsule.prediction.v1"));
+    }
+
+    #[test]
+    fn metrics_json_snapshot() {
+        let output = render_cli(&["metrics".to_string(), "--json".to_string()]);
+        assert!(output.contains("scheduler_decisions_total"));
     }
 }
