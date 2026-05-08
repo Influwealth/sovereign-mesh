@@ -1,0 +1,13 @@
+[package]
+name = "meshctl"
+version = "0.1.0"
+edition = "2021"
+description = "Sovereign Mesh admin CLI"
+license = "UNLICENSED"
+
+[[bin]]
+name = "meshctl"
+path = "src/main.rs"
+
+[dependencies]
+sovereign-mesh-runtime = { path = "../runtime" }

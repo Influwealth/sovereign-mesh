@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "meshctl",
     "runtime",
     "sdk",
     "sdk/macros",
