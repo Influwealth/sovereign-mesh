@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use crate::ingress::IngressMessage;
 use crate::quantum::QuantumInference;
 use crate::scheduler::ScheduleDecision;
-use crate::{CapsuleId, ExecutionError, Request, Response};
+use crate::{CapsuleId, ExecutionError, ExecutionMode, Request, Response, RuntimeContext};
 
 #[derive(Clone, Debug)]
 pub struct ExecutionContext {
@@ -153,4 +153,26 @@ pub fn execute_capsule(req: Request) -> Result<Response, ExecutionError> {
         message.clone(),
         message.into_bytes(),
     ))
+}
+
+pub fn execute_capsule_with_context(
+    context: &RuntimeContext,
+    req: Request,
+) -> Result<Response, ExecutionError> {
+    if let ExecutionMode::Replay { snapshot } = &context.execution_mode {
+        context
+            .state_store
+            .restore(snapshot)
+            .map_err(|error| ExecutionError::StateFailed(format!("{:?}", error)))?;
+    }
+
+    let state_key = format!("last_method_{}", req.method);
+    if matches!(context.execution_mode, ExecutionMode::Normal) {
+        context
+            .state_store
+            .set(&req.capsule_id, &state_key, req.payload.clone())
+            .map_err(|error| ExecutionError::StateFailed(format!("{:?}", error)))?;
+    }
+
+    execute_capsule(req)
 }

@@ -6,6 +6,7 @@ pub mod policy;
 pub mod policy_loader;
 pub mod quantum;
 pub mod scheduler;
+pub mod state;
 
 pub use audit::record_audit_event;
 pub use execution::execute_capsule;
@@ -14,6 +15,9 @@ pub use ingress::handle_ingress;
 pub use policy::check_policy;
 pub use quantum::run_quantum_job;
 pub use scheduler::{schedule, ScheduleDecision};
+pub use state::{FileStateStore, InMemoryStateStore, StateSnapshot, StateStore};
+
+use std::sync::Arc;
 
 use audit::{AuditEvent, AuditSink};
 use execution::{ExecutionContext, ExecutionReceipt, WasmExecutor};
@@ -121,6 +125,42 @@ pub enum ExecutionError {
     ExecutionFailed(String),
     AuditFailed(String),
     QuantumFailed(String),
+    StateFailed(String),
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum ExecutionMode {
+    Normal,
+    Replay { snapshot: StateSnapshot },
+}
+
+#[derive(Clone)]
+pub struct RuntimeContext {
+    pub node_id: NodeId,
+    pub execution_mode: ExecutionMode,
+    pub state_store: Arc<dyn StateStore>,
+}
+
+impl RuntimeContext {
+    pub fn new(node_id: impl Into<NodeId>, state_store: Arc<dyn StateStore>) -> Self {
+        Self {
+            node_id: node_id.into(),
+            execution_mode: ExecutionMode::Normal,
+            state_store,
+        }
+    }
+
+    pub fn replay(
+        node_id: impl Into<NodeId>,
+        state_store: Arc<dyn StateStore>,
+        snapshot: StateSnapshot,
+    ) -> Self {
+        Self {
+            node_id: node_id.into(),
+            execution_mode: ExecutionMode::Replay { snapshot },
+            state_store,
+        }
+    }
 }
 
 pub struct CapsuleRuntime<P, S, E, Q, A>
