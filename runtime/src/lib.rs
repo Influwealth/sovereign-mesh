@@ -219,10 +219,7 @@ where
 
         let schedule = self.scheduler.schedule(&ingress);
         let quantum_hint = self.quantum.infer("capsule-execution-readiness", &ingress.payload);
-        let context = ExecutionContext {
-            schedule,
-            quantum_hint: Some(quantum_hint),
-        };
+        let context = ExecutionContext::new(schedule, Some(quantum_hint));
 
         let receipt = self
             .executor
