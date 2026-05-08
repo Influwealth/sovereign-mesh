@@ -1,0 +1,13 @@
+[package]
+name = "observability-capsule"
+version = "0.1.0"
+edition = "2021"
+description = "Observability capsule for Sovereign Mesh metrics"
+license = "UNLICENSED"
+
+[lib]
+name = "observability_capsule"
+path = "src/lib.rs"
+
+[dependencies]
+sovereign-mesh-sdk = { path = "../../sdk" }

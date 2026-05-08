@@ -1,0 +1,26 @@
+version: 1
+capsule: capsule.observability.v1
+default_decision: deny
+callers:
+  agent:
+    methods:
+      - get_mesh_metrics
+      - get_recent_executions
+      - get_scheduler_lanes
+  sovereign-user:
+    methods:
+      - get_mesh_metrics
+      - get_scheduler_lanes
+  partner:
+    methods: []
+mutation:
+  allowed_methods: []
+queries:
+  allowed_methods:
+    - get_mesh_metrics
+    - get_recent_executions
+    - get_scheduler_lanes
+risk:
+  max_payload_bytes: 4096
+  require_audit: true
+  allow_probabilistic_quantum: false

@@ -1,0 +1,35 @@
+[capsule]
+id = "capsule.observability.v1"
+name = "Observability Capsule"
+version = "0.1.0"
+description = "Read-only observability capsule for mesh metrics, recent executions, and scheduler lanes."
+authors = ["Influwealth Quantum Labs"]
+runtime = "sovereign-mesh-runtime"
+wasm_target = "wasm32-unknown-unknown"
+wasm_module = "observability_capsule.wasm"
+
+[entrypoints]
+updates = []
+queries = ["get_mesh_metrics", "get_recent_executions", "get_scheduler_lanes"]
+query_dispatcher = "capsule_query_entry"
+
+[state]
+schema = "observability-state-v1"
+mutable = false
+retention = "runtime-derived"
+stable = false
+ephemeral = true
+sealed = false
+
+[governance]
+capsule_class = "observability"
+subsidy_class = "standard"
+review_required = false
+jurisdiction = "sovereign"
+upgrade_policy = "governance-approved"
+
+[quantum]
+enabled = false
+provider = "none"
+model = ""
+deterministic_required = true

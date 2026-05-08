@@ -1,0 +1,32 @@
+{
+  "title": "Sovereign Mesh Overview",
+  "panels": [
+    {
+      "title": "Scheduler Decisions by Lane",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "scheduler_decisions_total"
+        }
+      ]
+    },
+    {
+      "title": "Capsule Executions",
+      "type": "timeseries",
+      "targets": [
+        {
+          "expr": "capsule_executions_total"
+        }
+      ]
+    },
+    {
+      "title": "Pending Requests",
+      "type": "gauge",
+      "targets": [
+        {
+          "expr": "pending_requests"
+        }
+      ]
+    }
+  ]
+}

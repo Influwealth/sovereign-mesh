@@ -1,0 +1,28 @@
+version: 1
+capsule: capsule.observability.v1
+nodes:
+  - id: capsule.observability.v1
+    type: capsule
+    label: Observability Capsule
+  - id: runtime.metrics.v1
+    type: runtime-metrics
+    label: Runtime Metrics Registry
+  - id: exporter.prometheus.v1
+    type: exporter
+    label: Prometheus Exporter
+edges:
+  - from: capsule.observability.v1
+    to: runtime.metrics.v1
+    relation: reads
+  - from: exporter.prometheus.v1
+    to: runtime.metrics.v1
+    relation: exports
+events:
+  emits: []
+  consumes:
+    - scheduler.decision
+    - capsule.execution_started
+    - capsule.execution_completed
+    - capsule.execution_failed
+dependencies:
+  - runtime.metrics.v1

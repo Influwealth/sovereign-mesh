@@ -58,11 +58,14 @@ pub fn schedule(req: &Request) -> Result<ScheduleDecision, ExecutionError> {
         SubsidyClass::Enterprise => ExecutionPriority::Normal,
     };
 
-    Ok(ScheduleDecision {
+    let decision = ScheduleDecision {
         priority,
         lane,
         edge_eligible: matches!(req.edge_compatibility, EdgeCompatibility::Eligible),
-    })
+    };
+    crate::metrics::global_metrics().scheduler_decision(&decision.lane);
+    crate::metrics::global_metrics().set_pending_requests(&decision.lane, 0);
+    Ok(decision)
 }
 
 #[cfg(test)]

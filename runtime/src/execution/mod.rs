@@ -318,6 +318,7 @@ pub fn execute_capsule_with_context(
 }
 
 pub fn execution_started(capsule_id: &str, lane: &str, node_id: &str) {
+    crate::metrics::execution_started(capsule_id);
     println!(
         "sovereign-mesh.execution_started capsule_id={} lane={} node_id={}",
         capsule_id, lane, node_id
@@ -325,6 +326,8 @@ pub fn execution_started(capsule_id: &str, lane: &str, node_id: &str) {
 }
 
 pub fn execution_completed(capsule_id: &str, lane: &str, node_id: &str) {
+    crate::metrics::execution_completed(capsule_id);
+    crate::metrics::global_metrics().observe_execution_duration(capsule_id, 0.0);
     println!(
         "sovereign-mesh.execution_completed capsule_id={} lane={} node_id={}",
         capsule_id, lane, node_id
@@ -332,6 +335,7 @@ pub fn execution_completed(capsule_id: &str, lane: &str, node_id: &str) {
 }
 
 pub fn execution_failed(capsule_id: &str, lane: &str, node_id: &str) {
+    crate::metrics::execution_failed(capsule_id);
     println!(
         "sovereign-mesh.execution_failed capsule_id={} lane={} node_id={}",
         capsule_id, lane, node_id

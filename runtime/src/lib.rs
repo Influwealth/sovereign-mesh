@@ -2,6 +2,7 @@ pub mod audit;
 pub mod execution;
 pub mod graph;
 pub mod ingress;
+pub mod metrics;
 pub mod policy;
 pub mod policy_loader;
 pub mod quantum;

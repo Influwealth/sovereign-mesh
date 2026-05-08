@@ -1,0 +1,16 @@
+[audit]
+enabled = true
+stream = "audit.observability.v1"
+retention = "short-lived-runtime-audit"
+redaction = "runtime-summary-only"
+
+[audit.sinks.local]
+enabled = true
+path = "logs/observability.audit.log"
+
+[audit.fields]
+include_trace_id = true
+include_caller = true
+include_policy_decision = true
+include_execution_receipt = true
+include_quantum_boundary = false

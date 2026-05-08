@@ -1,5 +1,6 @@
 [workspace]
 members = [
+    "capsules/observability",
     "meshctl",
     "runtime",
     "sdk",
