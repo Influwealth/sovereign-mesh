@@ -5,8 +5,8 @@ use crate::quantum::QuantumInference;
 use crate::scheduler::ScheduleDecision;
 use crate::state::InMemoryStateStore;
 use crate::{
-    CapsuleId, ExecutionError as RuntimeExecutionError, ExecutionMode, MethodName, Request,
-    Response, RuntimeContext,
+    CapsuleId, DeepFlexAdapter, ExecutionError as RuntimeExecutionError, ExecutionMode,
+    MethodName, Request, Response, RuntimeContext,
 };
 
 #[derive(Clone)]
@@ -293,6 +293,38 @@ pub fn execute_capsule(req: Request) -> Result<Response, RuntimeExecutionError> 
         message.clone(),
         message.into_bytes(),
     ))
+}
+
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CapsuleBackend {
+    pub runtime: String,
+    pub backend: Option<String>,
+}
+
+pub fn execute_capsule_with_backend(
+    req: Request,
+    backend: &CapsuleBackend,
+    adapter: &DeepFlexAdapter,
+) -> Result<Response, RuntimeExecutionError> {
+    if crate::deepflex_adapter::backend_is_deepflex(&backend.runtime, backend.backend.as_deref()) {
+        let message = SAPMessage {
+            trace_id: req.trace_id.clone(),
+            capsule_id: req.capsule_id.clone(),
+            method: req.method.clone(),
+            is_update: true,
+            payload: req.payload.clone(),
+        };
+        let response = adapter.execute_mock(&message);
+        return Ok(Response::new(
+            response.job_id,
+            response.capsule_id,
+            response.method,
+            "routed through DeepFlex adapter",
+            response.payload,
+        ));
+    }
+
+    execute_capsule(req)
 }
 
 pub fn execute_capsule_with_context(

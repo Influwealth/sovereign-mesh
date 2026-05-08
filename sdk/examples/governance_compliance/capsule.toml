@@ -5,6 +5,7 @@ version = "0.1.0"
 description = "Governance capsule for subsidy class overrides and compliance flags."
 authors = ["Influwealth Quantum Labs"]
 runtime = "sovereign-mesh-runtime"
+backend = "sovereign-mesh-runtime"
 wasm_target = "wasm32-unknown-unknown"
 wasm_module = "governance_compliance.wasm"
 

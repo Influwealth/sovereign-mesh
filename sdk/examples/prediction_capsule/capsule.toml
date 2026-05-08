@@ -5,6 +5,7 @@ version = "0.1.0"
 description = "Example sovereign prediction capsule with mocked quantum inference boundary."
 authors = ["Influwealth Quantum Labs"]
 runtime = "sovereign-mesh-runtime"
+backend = "sovereign-mesh-runtime"
 wasm_target = "wasm32-unknown-unknown"
 wasm_module = "prediction_capsule.wasm"
 

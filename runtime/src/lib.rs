@@ -1,4 +1,6 @@
 pub mod audit;
+pub mod config;
+pub mod deepflex_adapter;
 pub mod execution;
 pub mod graph;
 pub mod ingress;
@@ -10,6 +12,7 @@ pub mod scheduler;
 pub mod state;
 
 pub use audit::record_audit_event;
+pub use deepflex_adapter::{DeepFlexAdapter, DeepFlexRequest, DeepFlexResponse};
 pub use execution::execute_capsule;
 pub use graph::{load_graph_for_capsule, CapsuleEdge, CapsuleGraph, CapsuleNode};
 pub use ingress::handle_ingress;
