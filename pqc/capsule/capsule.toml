@@ -1,0 +1,13 @@
+name = "pqc_email_shield"
+version = "0.1.0"
+description = "Post-Quantum Cryptography wrapper for email, messaging, and API traffic."
+
+[runtime]
+wasm_target = "wasm32-unknown-unknown"
+entry = "lib.rs"
+
+[metadata]
+authors = ["Influwealth"]
+capsule_type = "security"
+quantum_ready = true
+

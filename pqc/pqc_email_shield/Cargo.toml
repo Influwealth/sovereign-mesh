@@ -1,0 +1,17 @@
+[package]
+name = "pqc-email-shield"
+version = "0.1.0"
+edition = "2021"
+description = "PQC email/API wrapper (WASM-safe scaffold)"
+license = "UNLICENSED"
+
+[lib]
+name = "pqc_email_shield"
+path = "src/lib.rs"
+
+[features]
+default = []
+native-oqs = []
+
+[dependencies]
+

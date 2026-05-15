@@ -54,6 +54,33 @@ pub fn handle_ingress(req: Request) -> Result<Response, ExecutionError> {
             req.trace_id, schedule_decision.lane, schedule_decision.edge_eligible
         ),
     );
+    // PQC capsule fast-path (placeholder): routes encrypt/decrypt/sign/verify through runtime quantum hooks.
+    // TODO: move into execution engine dispatch once capsule registry loads pqc manifests.
+    if req.capsule_id == "capsule.pqc_email_shield.v1" {
+        let payload = match req.method.as_str() {
+            "encrypt" => crate::quantum::pqc_encrypt(b"recipient_pubkey", &req.payload)?,
+            "decrypt" => crate::quantum::pqc_decrypt(b"recipient_privkey", &req.payload)?,
+            "sign" => crate::quantum::pqc_sign(b"signing_privkey", &req.payload)?,
+            "verify" => {
+                let ok = crate::quantum::pqc_verify(b"signing_pubkey", &req.payload, b"sig")?;
+                ok.to_string().into_bytes()
+            }
+            _ => {
+                return Err(ExecutionError::ExecutionFailed(
+                    "unsupported pqc method".to_string(),
+                ))
+            }
+        };
+
+        return Ok(Response::new(
+            req.trace_id,
+            req.capsule_id,
+            req.method,
+            "pqc_email_shield executed",
+            payload,
+        ));
+    }
+
     let response = execute_capsule(req)?;
 
     record_audit_event(

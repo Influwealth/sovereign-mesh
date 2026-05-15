@@ -1,0 +1,12 @@
+allow:
+  - "encrypt"
+  - "decrypt"
+  - "sign"
+  - "verify"
+
+deny:
+  - "export_private_key"
+
+audit:
+  level: "full"
+

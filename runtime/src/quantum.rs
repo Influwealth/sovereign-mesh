@@ -1,4 +1,5 @@
 use crate::ExecutionError;
+use pqc_email_shield as pqc;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct QuantumInference {
@@ -48,6 +49,41 @@ impl QuantumBoundary for MockQuantumBoundary {
             explanation: "mocked deterministic quantum boundary".to_string(),
         }
     }
+}
+
+pub fn pqc_encrypt(recipient_pubkey: &[u8], plaintext: &[u8]) -> Result<Vec<u8>, ExecutionError> {
+    let ct = pqc::hybrid_encrypt(recipient_pubkey, plaintext)
+        .map_err(|e| ExecutionError::QuantumFailed(e.message))?;
+    // Simple framing: kem || 0x00 || payload
+    let mut out = Vec::new();
+    out.extend_from_slice(&ct.kem_ciphertext);
+    out.push(0);
+    out.extend_from_slice(&ct.payload_ciphertext);
+    Ok(out)
+}
+
+pub fn pqc_decrypt(recipient_privkey: &[u8], framed: &[u8]) -> Result<Vec<u8>, ExecutionError> {
+    let Some(split) = framed.iter().position(|b| *b == 0) else {
+        return Err(ExecutionError::QuantumFailed("invalid pqc frame".to_string()));
+    };
+    let ct = pqc::HybridCiphertext {
+        kem_ciphertext: framed[..split].to_vec(),
+        payload_ciphertext: framed[split + 1..].to_vec(),
+    };
+    pqc::hybrid_decrypt(recipient_privkey, &ct)
+        .map_err(|e| ExecutionError::QuantumFailed(e.message))
+}
+
+pub fn pqc_sign(signing_privkey: &[u8], message: &[u8]) -> Result<Vec<u8>, ExecutionError> {
+    let sig = pqc::hybrid_sign(signing_privkey, message)
+        .map_err(|e| ExecutionError::QuantumFailed(e.message))?;
+    Ok(sig.sig)
+}
+
+pub fn pqc_verify(signing_pubkey: &[u8], message: &[u8], signature: &[u8]) -> Result<bool, ExecutionError> {
+    let sig = pqc::HybridSignature { sig: signature.to_vec() };
+    pqc::hybrid_verify(signing_pubkey, message, &sig)
+        .map_err(|e| ExecutionError::QuantumFailed(e.message))
 }
 
 #[cfg(test)]

@@ -67,5 +67,19 @@ pub fn check_policy(req: &Request) -> Result<(), ExecutionError> {
         ));
     }
 
+    // PQC hooks: allow only explicit pqc_* methods for now.
+    // TODO: load pqc/capsule/policy.yaml and enforce allow/deny lists.
+    if req.capsule_id == "capsule.pqc_email_shield.v1" {
+        let allowed = matches!(
+            req.method.as_str(),
+            "encrypt" | "decrypt" | "sign" | "verify"
+        );
+        if !allowed {
+            return Err(ExecutionError::PolicyDenied(
+                "pqc_email_shield method denied by placeholder policy".to_string(),
+            ));
+        }
+    }
+
     Ok(())
 }

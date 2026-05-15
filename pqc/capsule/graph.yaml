@@ -1,0 +1,11 @@
+nodes:
+  - id: pqc_runtime
+    type: module
+  - id: email_wrapper
+    type: service
+
+edges:
+  - from: pqc_runtime
+    to: email_wrapper
+    relation: "provides_encryption"
+

@@ -10,3 +10,4 @@ name = "sovereign_mesh_runtime"
 path = "src/lib.rs"
 
 [dependencies]
+pqc-email-shield = { path = "../pqc/pqc_email_shield", package = "pqc-email-shield" }

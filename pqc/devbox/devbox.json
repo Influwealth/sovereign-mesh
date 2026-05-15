@@ -1,0 +1,22 @@
+{
+  "packages": [
+    "openssl@3",
+    "rustup",
+    "python3",
+    "python3-pip",
+    "cmake",
+    "ninja",
+    "git"
+  ],
+  "env": {
+    "RUSTFLAGS": "-C target-feature=+crt-static"
+  },
+  "shell": {
+    "init_hook": [
+      "echo 'PQC Devbox Environment Loaded'",
+      "rustup target add wasm32-unknown-unknown",
+      "pip install fastapi uvicorn"
+    ]
+  }
+}
+
