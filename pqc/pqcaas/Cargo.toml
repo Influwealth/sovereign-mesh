@@ -1,0 +1,14 @@
+[package]
+name = "pqcaas"
+version = "0.1.0"
+edition = "2021"
+description = "PQC-as-a-service minimal HTTP server"
+license = "UNLICENSED"
+
+[[bin]]
+name = "pqcaas"
+path = "src/main.rs"
+
+[dependencies]
+pqc-email-shield = { path = "../pqc_email_shield", package = "pqc-email-shield" }
+

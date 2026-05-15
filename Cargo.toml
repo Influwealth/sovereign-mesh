@@ -9,5 +9,6 @@ members = [
     "sdk/examples/governance_compliance",
     "sdk/examples/prediction_capsule",
     "pqc/pqc_email_shield",
+    "pqc/pqcaas",
 ]
 resolver = "2"

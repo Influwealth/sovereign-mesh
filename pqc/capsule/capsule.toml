@@ -1,13 +1,35 @@
-name = "pqc_email_shield"
+[capsule]
+id = "capsule.pqc_email_shield.v1"
+name = "PQC Email Shield"
 version = "0.1.0"
-description = "Post-Quantum Cryptography wrapper for email, messaging, and API traffic."
-
-[runtime]
-wasm_target = "wasm32-unknown-unknown"
-entry = "lib.rs"
-
-[metadata]
+description = "Post-quantum cryptography wrapper for email, messaging, and API traffic."
 authors = ["Influwealth"]
-capsule_type = "security"
-quantum_ready = true
+runtime = "sovereign-mesh-runtime"
+backend = "sovereign-mesh-runtime"
+wasm_target = "wasm32-unknown-unknown"
+wasm_module = "pqc_email_shield.wasm"
 
+[entrypoints]
+updates = ["encrypt", "decrypt", "sign", "verify"]
+queries = []
+update_dispatcher = "capsule_update_entry"
+
+[state]
+schema = "pqc-email-shield-state-v1"
+mutable = true
+retention = "sovereign-security-retain"
+stable = true
+ephemeral = false
+sealed = true
+
+[governance]
+capsule_class = "security"
+review_required = true
+jurisdiction = "sovereign"
+upgrade_policy = "governance-approved"
+
+[quantum]
+enabled = true
+provider = "pqc"
+model = "mlkem+mldsa"
+deterministic_required = true
